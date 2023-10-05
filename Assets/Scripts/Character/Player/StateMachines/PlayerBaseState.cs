@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 public class PlayerBaseState : IState
@@ -25,7 +26,7 @@ public class PlayerBaseState : IState
         RemoveActionsCallbacks();
     }
 
-    public virtual void HandlerInput()
+    public virtual void HandleInput()
     {
         ReadMovementInput();
     }
@@ -38,6 +39,30 @@ public class PlayerBaseState : IState
     public virtual void Update()
     {
         Move(); 
+    }
+   
+    protected virtual void AddInputActionsCallbacks()
+    {
+        PlayerInput input = stateMachine.Player.Input;
+        input.PlayerActions.Movement.canceled += OnMovementCanceled;
+        input.PlayerActions.Run.started += OnRunStarted; 
+    }
+
+    protected virtual void RemoveActionsCallbacks()
+    {
+        PlayerInput input = stateMachine.Player.Input;
+        input.PlayerActions.Movement.canceled -= OnMovementCanceled;
+        input.PlayerActions.Run.started -= OnRunStarted;
+    }
+    
+    protected virtual void OnRunStarted(InputAction.CallbackContext context)
+    {
+        
+    }
+
+    protected virtual void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+       
     }
 
     private void ReadMovementInput()
@@ -92,15 +117,7 @@ public class PlayerBaseState : IState
     {
         stateMachine.Player.Animator.SetBool(animationHash, false); 
     }
-    protected virtual void AddInputActionsCallbacks()
-    {
-
-    }
-
-    protected virtual void RemoveActionsCallbacks()
-    {
-
-    }
+ 
     private void Move(Vector3 movementDirection)
     {
         float movementSpeed = GetMovementSpeed();

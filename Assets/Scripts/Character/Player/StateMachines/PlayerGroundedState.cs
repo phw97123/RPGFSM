@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerGroundedState : PlayerBaseState
 {
     public PlayerGroundedState(PlayerStateMachine playerStateMachine) : base(playerStateMachine)
     {
+
     }
 
     public override void Enter()
@@ -28,5 +30,20 @@ public class PlayerGroundedState : PlayerBaseState
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+    }
+
+    protected override void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+        if (stateMachine.MovementInput == Vector2.zero)
+            return;
+
+        stateMachine.ChangeState(stateMachine.IdleState); 
+
+        base.OnMovementCanceled(context);
+    }
+
+    protected virtual void OnMove()
+    {
+        stateMachine.ChangeState(stateMachine.WalkState); 
     }
 }
