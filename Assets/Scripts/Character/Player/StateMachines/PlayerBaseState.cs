@@ -38,14 +38,16 @@ public class PlayerBaseState : IState
 
     public virtual void Update()
     {
-        Move(); 
+        Move();
     }
-   
+
     protected virtual void AddInputActionsCallbacks()
     {
         PlayerInput input = stateMachine.Player.Input;
         input.PlayerActions.Movement.canceled += OnMovementCanceled;
-        input.PlayerActions.Run.started += OnRunStarted; 
+        input.PlayerActions.Run.started += OnRunStarted;
+
+        stateMachine.Player.Input.PlayerActions.Jump.started += OnJumpStarted; 
     }
 
     protected virtual void RemoveActionsCallbacks()
@@ -53,16 +55,23 @@ public class PlayerBaseState : IState
         PlayerInput input = stateMachine.Player.Input;
         input.PlayerActions.Movement.canceled -= OnMovementCanceled;
         input.PlayerActions.Run.started -= OnRunStarted;
+
+        stateMachine.Player.Input.PlayerActions.Jump.started -= OnJumpStarted;
     }
-    
+
     protected virtual void OnRunStarted(InputAction.CallbackContext context)
     {
-        
+
     }
 
     protected virtual void OnMovementCanceled(InputAction.CallbackContext context)
     {
-       
+
+    }
+
+    protected virtual void OnJumpStarted(InputAction.CallbackContext context)
+    {
+
     }
 
     private void ReadMovementInput()
@@ -93,12 +102,12 @@ public class PlayerBaseState : IState
 
     private void Rotate(Vector3 movementDirection)
     {
-       if(movementDirection != Vector3.zero)
+        if (movementDirection != Vector3.zero)
         {
-            Transform playerTransform = stateMachine.Player.transform; 
+            Transform playerTransform = stateMachine.Player.transform;
             Quaternion targetRotation = Quaternion.LookRotation(movementDirection);
 
-            playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, targetRotation, stateMachine.RotationDamping * Time.deltaTime); 
+            playerTransform.rotation = Quaternion.Slerp(playerTransform.rotation, targetRotation, stateMachine.RotationDamping * Time.deltaTime);
         }
     }
 
@@ -109,20 +118,21 @@ public class PlayerBaseState : IState
     }
 
     protected void StartAnimation(int animationHash)
-    { 
+    {
         stateMachine.Player.Animator.SetBool(animationHash, true);
     }
 
     protected void StopAnimation(int animationHash)
     {
-        stateMachine.Player.Animator.SetBool(animationHash, false); 
+        stateMachine.Player.Animator.SetBool(animationHash, false);
     }
- 
+
     private void Move(Vector3 movementDirection)
     {
         float movementSpeed = GetMovementSpeed();
         stateMachine.Player.Controller.Move(
-               (movementDirection * movementSpeed) * Time.deltaTime
+               ((movementDirection * movementSpeed) + stateMachine.Player.ForceReceiver.Movement)
+               * Time.deltaTime
             );
 
     }

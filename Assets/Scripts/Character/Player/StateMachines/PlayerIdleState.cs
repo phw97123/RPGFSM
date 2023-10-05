@@ -17,6 +17,7 @@ public class PlayerIdleState : PlayerGroundedState
 
     public override void Exit()
     {
+        base.Exit(); 
         StopAnimation(stateMachine.Player.AnimationData.IdleParameterHash);
     }
 
