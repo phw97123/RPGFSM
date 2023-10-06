@@ -1,62 +1,60 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Enemy : MonoBehaviour
 {
     [field: Header("References")]
-    [field: SerializeField] public PlayerSO Data { get; private set; }
+    [field: SerializeField] public EnemySO Data { get; private set; }
 
     [field: Header("Animations")]
     [field: SerializeField] public PlayerAnimationData AnimationData { get; private set; }
 
     public Rigidbody Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
-    public PlayerInput Input { get; private set; }
+    public ForceReceiver ForceReceiver { get; private set; }
     public CharacterController Controller { get; private set; }
 
-    public ForceReceiver ForceReceiver { get; private set; }
     [field: SerializeField] public Weapon Weapon { get; private set; }
 
-    public Health health { get; private set;  }
+    public Health Health { get; private set;  }
 
-    private PlayerStateMachine stateMachine;
+    private EnemyStateMachine stateMachine;
 
-    private void Awake()
+    void Awake()
     {
         AnimationData.Initialize();
 
         Rigidbody = GetComponent<Rigidbody>();
         Animator = GetComponentInChildren<Animator>();
-        Input = GetComponent<PlayerInput>();
         Controller = GetComponent<CharacterController>();
         ForceReceiver = GetComponent<ForceReceiver>();
-        health = GetComponent<Health>(); 
+        Health = GetComponent<Health>(); 
 
-        stateMachine = new PlayerStateMachine(this);
+        stateMachine = new EnemyStateMachine(this);
     }
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        stateMachine.ChangeState(stateMachine.IdleState);
-
-        health.OnDie += OnDie; 
+        stateMachine.ChangeState(stateMachine.IdlingState);
+        Health.OnDie += OnDie; 
     }
 
     private void Update()
     {
         stateMachine.HandleInput();
+
         stateMachine.Update();
     }
+
     private void FixedUpdate()
     {
         stateMachine.PhysicsUpdate();
     }
-
     private void OnDie()
     {
         Animator.SetTrigger("Die");
-        enabled = false; 
+        enabled = false;
     }
 }
